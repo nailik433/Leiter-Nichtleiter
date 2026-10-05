@@ -359,7 +359,7 @@
         for (let c = 0; c < COLS; c++) {
           const jx = m.kind === 'glass' ? ((c * 7 + r * 3) % 5 - 2) * 4 : 0;
           const jy = m.kind === 'glass' ? ((c * 5 + r * 11) % 5 - 2) * 3 : 0;
-          const a = addAtom(gx(c) + jx, gy(r) + jy, m.atom, true, { c, r });
+          const a = addAtom(gx(c) + jx, gy(r) + jy, m.atom, true, { c, row: r });
           grid[r][c] = a;
           if (prev && (m.kind === 'chain' || (c * 3 + r) % 4 !== 0)) bonds.push([prev, a]);
           prev = a;
@@ -443,7 +443,7 @@
     // Feststoffe: Atome sitzen fest an ihrem Platz
     atoms.forEach(a => {
       a.x = a.bx;
-      a.y = m.kind === 'chain' ? a.by + Math.sin(a.c * 1.3 + a.r) * 7 : a.by;
+      a.y = m.kind === 'chain' ? a.by + Math.sin(a.c * 1.3 + a.row) * 7 : a.by;
     });
   }
 
