@@ -274,14 +274,14 @@
   }
   const eSpr = sprite(22, (g, r) => {
     const gr = g.createRadialGradient(r, r, 0, r, r, r);
-    gr.addColorStop(0, '#FFFFFF'); gr.addColorStop(0.1, '#DDF4FF'); gr.addColorStop(0.26, '#7FD3FF');
-    gr.addColorStop(0.31, 'rgba(127,211,255,.45)'); gr.addColorStop(0.55, 'rgba(127,211,255,.12)'); gr.addColorStop(1, 'rgba(127,211,255,0)');
+    gr.addColorStop(0, '#E6F7FF'); gr.addColorStop(0.18, '#A5E0FF'); gr.addColorStop(0.27, '#7FD3FF');
+    gr.addColorStop(0.3, 'rgba(127,211,255,.22)'); gr.addColorStop(0.4, 'rgba(127,211,255,.05)'); gr.addColorStop(0.5, 'rgba(127,211,255,0)');
     g.fillStyle = gr; g.fillRect(0, 0, 2 * r, 2 * r);
   });
   const lampSpr = sprite(190, (g, r) => {
     const gr = g.createRadialGradient(r, r, 0, r, r, r);
-    gr.addColorStop(0, 'rgba(255,250,225,1)'); gr.addColorStop(0.16, 'rgba(255,233,168,.85)'); gr.addColorStop(0.4, 'rgba(255,193,69,.28)');
-    gr.addColorStop(0.7, 'rgba(255,170,40,.08)'); gr.addColorStop(1, 'rgba(255,170,40,0)');
+    gr.addColorStop(0, 'rgba(255,240,200,.7)'); gr.addColorStop(0.2, 'rgba(255,225,150,.35)'); gr.addColorStop(0.5, 'rgba(255,193,69,.08)');
+    gr.addColorStop(1, 'rgba(255,170,40,0)');
     g.fillStyle = gr; g.fillRect(0, 0, 2 * r, 2 * r);
   });
   const atomSprCache = {};
@@ -431,7 +431,7 @@
 
   const WIRES = [[490, 70, 334, 70], [266, 70, 120, 70], [120, 70, 120, 270], [120, 270, 402, 270], [598, 270, 880, 270], [880, 270, 880, 202], [880, 138, 880, 70], [880, 70, 510, 70]];
   function drawWires() {
-    if (flow > 0.02) WIRES.forEach(w => stroke(...w, `rgba(127,211,255,${0.13 * flow})`, 22));
+    if (flow > 0.02) WIRES.forEach(w => stroke(...w, `rgba(127,211,255,${0.06 * flow})`, 16));
     WIRES.forEach(w => stroke(...w, '#0C1428', 10));
     WIRES.forEach(w => stroke(...w, '#8E9BB5', 6));
     WIRES.forEach(w => stroke(...w, 'rgba(255,255,255,.28)', 1.6));
@@ -456,7 +456,7 @@
     ctx.fillStyle = C.text;
     ctx.beginPath(); ctx.arc(270, 70, 7, 0, 7); ctx.fill();
     ctx.beginPath(); ctx.arc(330, 70, 7, 0, 7); ctx.fill();
-    if (swT > 0.98 && flow > 0.05) blit(eSpr, 330, 70, 0.9, 0.4 * flow);
+    if (swT > 0.98 && flow > 0.05) blit(eSpr, 330, 70, 0.9, 0.2 * flow);
     label('Schalter', 300, 110, { s: 17 });
   }
 
@@ -465,15 +465,15 @@
     const fl = lampB * (1 + 0.025 * Math.sin(T * 47) * Math.sin(T * 13));
     if (fl > 0.02) {
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      blit(lampSpr, cx, cy, 0.55 + 0.45 * fl, fl);
+      blit(lampSpr, cx, cy, 0.45 + 0.15 * fl, 0.8 * fl);
       ctx.translate(cx, cy); ctx.rotate(T * 0.15);
-      for (let i = 0; i < 14; i++) {
-        ctx.rotate(Math.PI * 2 / 14);
-        const len = 58 + 34 * fl + (i % 2) * 18;
-        const g = ctx.createLinearGradient(40, 0, len + 40, 0);
-        g.addColorStop(0, `rgba(255,225,150,${0.5 * fl})`); g.addColorStop(1, 'rgba(255,225,150,0)');
-        ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(42, 0); ctx.lineTo(len + 40, 0); ctx.stroke();
+      for (let i = 0; i < 8; i++) {
+        ctx.rotate(Math.PI * 2 / 8);
+        const len = 14 + 10 * fl;
+        const g = ctx.createLinearGradient(42, 0, len + 42, 0);
+        g.addColorStop(0, `rgba(255,225,150,${0.35 * fl})`); g.addColorStop(1, 'rgba(255,225,150,0)');
+        ctx.strokeStyle = g; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(42, 0); ctx.lineTo(len + 42, 0); ctx.stroke();
       }
       ctx.restore();
     }
