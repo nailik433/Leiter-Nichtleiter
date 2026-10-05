@@ -381,7 +381,7 @@
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++, k++) {
         const x = P.x0 + 40 + (SPAN - 80) * (c + (r % 2) * 0.5) / cols, y = P.y0 + 30 + (P.y1 - P.y0 - 62) * r / (rows - 1);
         let type = 'w';
-        if (m.kind === 'salt' && k % 5 === 2) type = Math.floor(k / 5) % 2 ? 'cl' : 'na';
+        if (m.kind === 'salt' && k % 3 === 1) type = Math.floor(k / 3) % 2 ? 'cl' : 'na';
         addMol(x + rnd(-6, 6), y + rnd(-6, 6), type);
       }
     } else if (m.kind === 'air') {
@@ -410,7 +410,7 @@
       return;
     }
     if (m.kind === 'water' || m.kind === 'salt') {
-      const damp = Math.max(0, 1 - 1.2 * dt), drift = 26 * flow;
+      const damp = Math.max(0, 1 - 1.2 * dt), drift = 80 * flow;
       mols.forEach(mo => {
         mo.vx = (mo.vx + rnd(-1, 1) * 90 * dt) * damp; mo.vy = (mo.vy + rnd(-1, 1) * 90 * dt) * damp;
         mo.va = (mo.va + rnd(-1, 1) * 3 * dt) * damp;
@@ -419,7 +419,12 @@
       const push = Math.min(1, dt * 8);
       for (let i = 0; i < mols.length; i++) for (let j = i + 1; j < mols.length; j++) {
         const a = mols[i], b = mols[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), min = 46;
-        if (d < min && d > 0.01) { const f = (min - d) / d * 0.5 * push; a.x -= dx * f; a.y -= dy * f; b.x += dx * f; b.y += dy * f; }
+        if (d < min && d > 0.01) {
+          // Ionen drängeln sich durch: Wassermoleküle weichen stärker aus als die Ionen
+          const f = (min - d) / d * push, ia = a.type !== 'w', ib = b.type !== 'w';
+          const wa = ia === ib ? 0.5 : ia ? 0.15 : 0.85;
+          a.x -= dx * f * wa; a.y -= dy * f * wa; b.x += dx * f * (1 - wa); b.y += dy * f * (1 - wa);
+        }
       }
       mols.forEach(mo => {
         const dir = mo.type === 'na' ? -1 : mo.type === 'cl' ? 1 : 0;
@@ -711,6 +716,19 @@
     ctx.globalAlpha = fa;
     ctx.strokeStyle = m.kind === 'graphit' ? 'rgba(154,161,172,.28)' : 'rgba(185,198,222,.32)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
     ctx.beginPath(); bonds.forEach(([a, b]) => { ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); }); ctx.stroke();
+    // Schweif hinter wandernden Ionen macht den Ionenfluss sichtbar
+    if (m.kind === 'salt' && flow > 0.05) {
+      ctx.lineCap = 'round';
+      mols.forEach(mo => {
+        if (mo.type === 'w') return;
+        const dir = mo.type === 'na' ? -1 : 1, len = 70 * flow, x0 = mo.x - dir * len;
+        const g = ctx.createLinearGradient(x0, 0, mo.x, 0);
+        g.addColorStop(0, rgba(mo.o.col, 0)); g.addColorStop(1, rgba(mo.o.col, 0.55));
+        ctx.globalAlpha = fa * ionFade(mo.o); ctx.strokeStyle = g; ctx.lineWidth = mo.type === 'na' ? 14 : 20;
+        ctx.beginPath(); ctx.moveTo(x0, mo.y); ctx.lineTo(mo.x, mo.y); ctx.stroke();
+      });
+      ctx.globalAlpha = fa;
+    }
     atoms.forEach(a => blit(atomSpr(a.col, a.r || AR), a.x, a.y, 1, fa * (a.ion ? ionFade(a) : 1)));
     atoms.forEach(a => { if (a.ion) { ctx.globalAlpha = fa * ionFade(a); label(a.ion === 'na' ? '+' : '−', a.x, a.y - 1, { s: a.ion === 'na' ? 18 : 22, col: '#FFFFFF', w: 700 }); } });
     ctx.globalAlpha = fa;
