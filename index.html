@@ -183,11 +183,13 @@
           <div><svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="#C7CCD4" fill-opacity=".28" stroke="#C7CCD4" stroke-width="1.5"/></svg>Atom</div>
           <div><svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="#C7CCD4" fill-opacity=".28" stroke="#C7CCD4" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#7FD3FF" stroke-opacity=".35" stroke-dasharray="2 2"/><circle cx="15" cy="10" r="2.8" fill="#7FD3FF"/></svg>Elektron, fest im Atom</div>
           <div><svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#7FD3FF" fill-opacity=".2"/><circle cx="10" cy="10" r="4.5" fill="#7FD3FF"/></svg>freies Elektron</div>
+          <div id="legIon" hidden><svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="#B98CFF" fill-opacity=".35" stroke="#B98CFF" stroke-width="1.5"/><text x="10" y="14.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">+</text></svg>Natrium-Ion (Na⁺)</div>
+          <div id="legIon2" hidden><svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="#6FDC8C" fill-opacity=".35" stroke="#6FDC8C" stroke-width="1.5"/><text x="10" y="14.5" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">−</text></svg>Chlorid-Ion (Cl⁻)</div>
         </div>
       </div>
 
       <div class="keys" aria-label="Tastenkürzel">
-        <span><kbd>Leertaste</kbd> Schalter</span><span><kbd>1</kbd>–<kbd>8</kbd> Material</span>
+        <span><kbd>Leertaste</kbd> Schalter</span><span><kbd>1</kbd>–<kbd>9</kbd>, <kbd>0</kbd> Material</span>
         <span><kbd>T</kbd> Verfolgen</span><span><kbd>P</kbd> Anhalten</span><span><kbd>F</kbd> Vollbild</span>
       </div>
     </aside>
@@ -210,6 +212,8 @@
     kunststoff: { name: 'Kunststoff',        kind: 'chain',   atom: '#9FB7D9', sample: '#E9EEF5', I: 0 },
     holz:       { name: 'Holz (trocken)',    kind: 'chain',   atom: '#D3A06C', sample: '#A0703F', I: 0 },
     glas:       { name: 'Glas',              kind: 'glass',   atom: '#8FD1C8', sample: '#9CC9D3', I: 0 },
+    wasser:     { name: 'Destilliertes Wasser', kind: 'water', atom: '#FF8A7A', sample: '#6FA8DC', I: 0 },
+    salzwasser: { name: 'Salzwasser',        kind: 'salt',    atom: '#FF8A7A', sample: '#9CCBEA', I: 0.55 },
     luft:       { name: 'Luft',              kind: 'air',     atom: '#AEB8C8', sample: null, I: 0 },
   };
 
@@ -233,6 +237,14 @@
     insul: {
       on: ['Das Lämpchen leuchtet nicht. {n} ist ein Nichtleiter (Isolator).', 'In {n} bleibt jedes Elektron in seinem Atom. Die Batterie zieht an den Elektronen, aber sie können ihr Atom nicht verlassen. Darum fließt im ganzen Stromkreis kein Strom.'],
       off: 'Auch in {n} gibt es Elektronen. Jedes sitzt fest in seinem Atom.'
+    },
+    water: {
+      on: ['Das Lämpchen leuchtet nicht. Destilliertes Wasser ist (praktisch) ein Nichtleiter.', 'Destilliertes Wasser besteht nur aus Wassermolekülen. Ihre Elektronen bleiben in den Molekülen, und es gibt fast keine geladenen Teilchen, die wandern könnten. Darum fließt praktisch kein Strom.'],
+      off: 'Destilliertes Wasser enthält nur Wassermoleküle. In der Flüssigkeit bewegen sie sich durcheinander, aber jedes Elektron bleibt in seinem Molekül.'
+    },
+    salt: {
+      on: ['Das Lämpchen leuchtet schwach. Salzwasser ist ein Leiter.', 'Im Salzwasser gibt es keine freien Elektronen, aber geladene Teilchen: Ionen. Die positiven Natrium-Ionen (Na⁺) wandern zum Minuspol, die negativen Chlorid-Ionen (Cl⁻) zum Pluspol. So fließt Strom durch die Flüssigkeit.'],
+      off: 'Im Wasser ist Kochsalz gelöst. Es zerfällt dabei in Ionen: positive Natrium-Ionen (Na⁺) und negative Chlorid-Ionen (Cl⁻). Sie schwimmen frei zwischen den Wassermolekülen umher.'
     },
     air: {
       on: ['Das Lämpchen leuchtet nicht. Luft ist ein Nichtleiter.', 'In Luft gibt es nur wenige Teilchen, und ihre Elektronen bleiben in den Atomen. Deshalb unterbricht ein offener Schalter den Stromkreis: Er ist eine Luftlücke.'],
@@ -285,12 +297,13 @@
     g.fillStyle = gr; g.fillRect(0, 0, 2 * r, 2 * r);
   });
   const atomSprCache = {};
-  function atomSpr(col) {
-    if (atomSprCache[col]) return atomSprCache[col];
-    return atomSprCache[col] = sprite(AR + 3, (g, r) => {
-      const gr = g.createRadialGradient(r - 5, r - 6, 1, r, r, AR);
+  function atomSpr(col, ar = AR) {
+    const key = col + ar;
+    if (atomSprCache[key]) return atomSprCache[key];
+    return atomSprCache[key] = sprite(ar + 3, (g, r) => {
+      const gr = g.createRadialGradient(r - ar * 0.3, r - ar * 0.38, 1, r, r, ar);
       gr.addColorStop(0, 'rgba(255,255,255,.55)'); gr.addColorStop(0.35, rgba(col, 0.45)); gr.addColorStop(1, rgba(col, 0.16));
-      g.fillStyle = gr; g.beginPath(); g.arc(r, r, AR, 0, 7); g.fill();
+      g.fillStyle = gr; g.beginPath(); g.arc(r, r, ar, 0, 7); g.fill();
       g.strokeStyle = col; g.lineWidth = 2.4; g.stroke();
       g.fillStyle = rgba(col, 0.9); g.beginPath(); g.arc(r, r, 3.2, 0, 7); g.fill();
     });
@@ -353,6 +366,24 @@
         }
       }
       if (m.kind === 'glass') for (let r = 0; r + 1 < ROWS; r++) for (let c = 0; c < COLS; c++) if ((c * 5 + r * 2) % 3 === 0) bonds.push([grid[r][c], grid[r + 1][c]]);
+    } else if (m.kind === 'water' || m.kind === 'salt') {
+      const addMol = (x, y, type) => {
+        const mo = { x, y, vx: rnd(-6, 6), vy: rnd(-6, 6), ang: rnd(0, 7), va: rnd(-0.6, 0.6), type };
+        if (type === 'w') {
+          mo.o = addAtom(x, y, '#FF8A7A', true, { r: 14 });
+          mo.h1 = addAtom(x, y, '#E8EEF5', false, { r: 8 });
+          mo.h2 = addAtom(x, y, '#E8EEF5', false, { r: 8 });
+          bonds.push([mo.o, mo.h1], [mo.o, mo.h2]);
+        } else mo.o = addAtom(x, y, type === 'na' ? '#B98CFF' : '#6FDC8C', false, { r: type === 'na' ? 12 : 17, ion: type });
+        mols.push(mo);
+      };
+      const cols = 11, rows = 4; let k = 0;
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++, k++) {
+        const x = P.x0 + 40 + (SPAN - 80) * (c + (r % 2) * 0.5) / cols, y = P.y0 + 30 + (P.y1 - P.y0 - 62) * r / (rows - 1);
+        let type = 'w';
+        if (m.kind === 'salt' && k % 5 === 2) type = Math.floor(k / 5) % 2 ? 'cl' : 'na';
+        addMol(x + rnd(-6, 6), y + rnd(-6, 6), type);
+      }
     } else if (m.kind === 'air') {
       const spots = [[0.12, 0.25], [0.3, 0.7], [0.45, 0.3], [0.62, 0.75], [0.78, 0.35], [0.9, 0.7], [0.2, 0.55], [0.55, 0.52]];
       spots.forEach(([fx, fy], i) => {
@@ -378,14 +409,41 @@
       });
       return;
     }
-    atoms.forEach(a => {
-      if (m.kind === 'chain') {
-        a.x = a.bx + Math.sin(T * 4.3 + a.ph) * 0.8;
-        a.y = a.by + Math.sin(a.c * 1.3 + a.r + T * 1.3) * 7 + Math.cos(T * 5 + a.ph) * 0.8;
-      } else {
-        a.x = a.bx + Math.sin(T * 6.1 + a.ph) * 1.1;
-        a.y = a.by + Math.cos(T * 5.3 + a.ph * 1.7) * 1.1;
+    if (m.kind === 'water' || m.kind === 'salt') {
+      const damp = Math.max(0, 1 - 1.2 * dt), drift = 26 * flow;
+      mols.forEach(mo => {
+        mo.vx = (mo.vx + rnd(-1, 1) * 90 * dt) * damp; mo.vy = (mo.vy + rnd(-1, 1) * 90 * dt) * damp;
+        mo.va = (mo.va + rnd(-1, 1) * 3 * dt) * damp;
+      });
+      // Teilchen stoßen sich ab, damit sie sich nicht überlappen
+      const push = Math.min(1, dt * 8);
+      for (let i = 0; i < mols.length; i++) for (let j = i + 1; j < mols.length; j++) {
+        const a = mols[i], b = mols[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), min = 46;
+        if (d < min && d > 0.01) { const f = (min - d) / d * 0.5 * push; a.x -= dx * f; a.y -= dy * f; b.x += dx * f; b.y += dy * f; }
       }
+      mols.forEach(mo => {
+        const dir = mo.type === 'na' ? -1 : mo.type === 'cl' ? 1 : 0;
+        mo.x += (mo.vx + dir * drift) * dt; mo.y += mo.vy * dt; mo.ang += mo.va * dt;
+        if (mo.y < P.y0 + 16) { mo.y = P.y0 + 16; mo.vy = Math.abs(mo.vy); }
+        if (mo.y > P.y1 - 20) { mo.y = P.y1 - 20; mo.vy = -Math.abs(mo.vy); }
+        if (dir) {
+          if (mo.x > P.x1 + 14) mo.x -= SPAN + 28; else if (mo.x < P.x0 - 14) mo.x += SPAN + 28;
+        } else {
+          if (mo.x < P.x0 + 12) { mo.x = P.x0 + 12; mo.vx = Math.abs(mo.vx); }
+          if (mo.x > P.x1 - 12) { mo.x = P.x1 - 12; mo.vx = -Math.abs(mo.vx); }
+        }
+        mo.o.x = mo.x; mo.o.y = mo.y;
+        if (mo.h1) {
+          mo.h1.x = mo.x + Math.cos(mo.ang - 0.91) * 18; mo.h1.y = mo.y + Math.sin(mo.ang - 0.91) * 18;
+          mo.h2.x = mo.x + Math.cos(mo.ang + 0.91) * 18; mo.h2.y = mo.y + Math.sin(mo.ang + 0.91) * 18;
+        }
+      });
+      return;
+    }
+    // Feststoffe: Atome sitzen fest an ihrem Platz
+    atoms.forEach(a => {
+      a.x = a.bx;
+      a.y = m.kind === 'chain' ? a.by + Math.sin(a.c * 1.3 + a.r) * 7 : a.by;
     });
   }
 
@@ -498,9 +556,11 @@
     ctx.strokeStyle = 'rgba(127,211,255,.28)'; ctx.lineWidth = 1.2; ctx.setLineDash([5, 6]); ctx.lineDashOffset = -T * 12;
     ctx.beginPath(); ctx.moveTo(410, 292); ctx.lineTo(P.x0 - 20, 360); ctx.moveTo(590, 292); ctx.lineTo(P.x1 + 20, 360); ctx.stroke(); ctx.setLineDash([]);
 
+    const liquid = m.kind === 'water' || m.kind === 'salt';
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5;
-    if (m.sample) {
+    if (liquid) { ctx.fillStyle = 'rgba(200,230,255,.10)'; roundRect(x, y - 14, w, h + 22, 7); ctx.fill(); }
+    if (m.sample && !liquid) {
       let fillStyle;
       if (mat === 'kupfer') fillStyle = vgrad(y, h, ['#F6C29C', '#D8895A', '#B86A3C', '#7A3E1E']);
       else if (mat === 'alu') fillStyle = vgrad(y, h, ['#FFFFFF', '#D5DAE1', '#AEB5C0', '#7D8591']);
@@ -512,7 +572,26 @@
       ctx.fillStyle = fillStyle; roundRect(x, y, w, h, 7); ctx.fill();
     }
     ctx.restore();
-    if (m.sample) {
+    if (liquid) {
+      const top = y - 6;
+      ctx.save(); roundRect(x, y - 14, w, h + 22, 7); ctx.clip();
+      ctx.fillStyle = vgrad(top, h + 14, m.kind === 'salt' ? ['rgba(170,215,245,.55)', 'rgba(110,170,225,.6)', 'rgba(70,125,190,.75)'] : ['rgba(140,195,240,.5)', 'rgba(90,150,215,.6)', 'rgba(55,110,180,.75)']);
+      ctx.beginPath(); ctx.moveTo(x, top);
+      for (let k = 0; k <= w; k += 6) ctx.lineTo(x + k, top + Math.sin(k * 0.07 + T * 2) * 1.5);
+      ctx.lineTo(x + w, y + h + 8); ctx.lineTo(x, y + h + 8); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(230,245,255,.75)'; ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let k = 0; k <= w; k += 6) { const yy = top + Math.sin(k * 0.07 + T * 2) * 1.5; k ? ctx.lineTo(x + k, yy) : ctx.moveTo(x, yy); }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      for (let i = 0; i < 6; i++) { const py = y + h + 4 - ((T * 9 + i * 13) % (h + 6)), px = x + 30 + i * 24 + Math.sin(T * 2 + i) * 2; ctx.beginPath(); ctx.arc(px, py, 1.6, 0, 7); ctx.fill(); }
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(220,245,255,.7)'; ctx.lineWidth = 1.5; roundRect(x, y - 14, w, h + 22, 7); ctx.stroke();
+      [x + 6, x + w - 14].forEach(ex => {
+        const g = ctx.createLinearGradient(ex, 0, ex + 8, 0); g.addColorStop(0, '#E6EAF0'); g.addColorStop(1, '#8C939E');
+        ctx.fillStyle = g; ctx.fillRect(ex, y - 20, 8, h + 22); ctx.strokeStyle = 'rgba(5,10,22,.6)'; ctx.lineWidth = 1; ctx.strokeRect(ex, y - 20, 8, h + 22);
+      });
+    }
+    if (m.sample && !liquid) {
       ctx.save(); roundRect(x, y, w, h, 7); ctx.clip();
       if (mat === 'holz') {
         ctx.strokeStyle = 'rgba(70,40,15,.45)'; ctx.lineWidth = 1.3;
@@ -532,7 +611,7 @@
       }
       ctx.restore();
       ctx.strokeStyle = mat === 'glas' ? 'rgba(220,245,255,.7)' : 'rgba(5,10,22,.7)'; ctx.lineWidth = 1.5; roundRect(x, y, w, h, 7); ctx.stroke();
-    } else {
+    } else if (!liquid) {
       ctx.strokeStyle = 'rgba(185,198,222,.28)'; ctx.lineWidth = 1.2; ctx.setLineDash([4, 5]); roundRect(x + 4, y, w - 8, h, 7); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = 'rgba(185,198,222,.35)';
       for (let i = 0; i < 9; i++) { const px = x + 16 + ((i * 47 + T * 14 * (i % 3 + 1)) % (w - 32)), py = y + 8 + ((i * 13) % 16) + Math.sin(T * 2 + i) * 3; ctx.beginPath(); ctx.arc(px, py, 1.6, 0, 7); ctx.fill(); }
@@ -541,14 +620,14 @@
     // Fokus-Ecken
     const a = 0.55 + 0.3 * Math.sin(T * 2.4);
     ctx.strokeStyle = rgba('#7FD3FF', a); ctx.lineWidth = 2.5; ctx.lineCap = 'round';
-    const bx0 = 396, by0 = 242, bx1 = 604, by1 = 298, L = 13;
+    const bx0 = 396, by0 = liquid ? 228 : 242, bx1 = 604, by1 = liquid ? 302 : 298, L = 13;
     ctx.beginPath();
     ctx.moveTo(bx0, by0 + L); ctx.lineTo(bx0, by0); ctx.lineTo(bx0 + L, by0);
     ctx.moveTo(bx1 - L, by0); ctx.lineTo(bx1, by0); ctx.lineTo(bx1, by0 + L);
     ctx.moveTo(bx0, by1 - L); ctx.lineTo(bx0, by1); ctx.lineTo(bx0 + L, by1);
     ctx.moveTo(bx1 - L, by1); ctx.lineTo(bx1, by1); ctx.lineTo(bx1, by1 - L);
     ctx.stroke();
-    label(m.kind === 'air' ? 'Probe: Luftlücke' : 'Probe: ' + m.name, 500, 226, { s: 18, col: C.text, w: 700 });
+    label(m.kind === 'air' ? 'Probe: Luftlücke' : 'Probe: ' + m.name, 500, liquid ? 214 : 226, { s: 18, col: C.text, w: 700 });
   }
   function clip(x, y, dir) {
     const g = ctx.createLinearGradient(0, y - 10, 0, y + 10);
@@ -586,7 +665,9 @@
     label('− vom Minuspol', P.x0, P.y1 + 8, { s: 14, al: 'left', col: C.minus, w: 700 });
     label('zum Pluspol +', P.x1, P.y1 + 8, { s: 14, al: 'right', col: C.plus, w: 700 });
     if (swT > 0.98 && closed) {
-      if (currentI() > 0) {
+      if (currentI() > 0 && m.kind === 'salt') {
+        label('Na⁺ wandern zum Minuspol, Cl⁻ zum Pluspol', P.x1 - 26, 377, { s: 15, al: 'right', col: C.accent, w: 700 });
+      } else if (currentI() > 0) {
         const x0 = P.x1 - 300, x1 = P.x1 - 30;
         const g = ctx.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, 'rgba(255,193,69,0)'); g.addColorStop(1, C.accent);
         ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0, 377); ctx.lineTo(x1 - 10, 377); ctx.stroke();
@@ -624,10 +705,15 @@
       ctx.globalAlpha = 1;
     }
 
+    if (m.kind === 'water' || m.kind === 'salt') {
+      ctx.globalAlpha = fa; ctx.fillStyle = 'rgba(90,150,215,.08)'; ctx.fillRect(P.x0 - 18, 388, SPAN + 36, P.y1 - 388 + 4);
+    }
     ctx.globalAlpha = fa;
     ctx.strokeStyle = m.kind === 'graphit' ? 'rgba(154,161,172,.28)' : 'rgba(185,198,222,.32)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
     ctx.beginPath(); bonds.forEach(([a, b]) => { ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); }); ctx.stroke();
-    atoms.forEach(a => blit(atomSpr(a.col), a.x, a.y, 1, fa));
+    atoms.forEach(a => blit(atomSpr(a.col, a.r || AR), a.x, a.y, 1, fa * (a.ion ? ionFade(a) : 1)));
+    atoms.forEach(a => { if (a.ion) { ctx.globalAlpha = fa * ionFade(a); label(a.ion === 'na' ? '+' : '−', a.x, a.y - 1, { s: a.ion === 'na' ? 18 : 22, col: '#FFFFFF', w: 700 }); } });
+    ctx.globalAlpha = fa;
 
     // gebundene Elektronen: kreisen im Atom, werden bei geschlossenem Schalter zum Pluspol gezogen
     ctx.strokeStyle = 'rgba(127,211,255,.14)'; ctx.lineWidth = 1;
@@ -667,9 +753,12 @@
     const a = clamp01((e.x - FL) / 30) * clamp01((FU - e.x) / 30);
     return [x, y, a];
   }
+  function ionFade(a) { return clamp01((a.x - P.x0 + 10) / 25) * clamp01((P.x1 + 10 - a.x) / 25); }
   function trackedIdx() { return free.length ? Math.floor(free.length / 2) : -1; }
   function trackedPos() {
     if (free.length) return freePos(free[trackedIdx()]);
+    const ion = mols.find(mo => mo.type === 'cl');
+    if (ion) return [ion.x, ion.y];
     if (bound.length) return boundPos(bound[Math.floor(bound.length / 2)]);
     return null;
   }
@@ -712,7 +801,7 @@
     });
     const pull = closed && swT > 0.98 ? 6 : 0;
     bound.forEach(b => { b.shift += (pull - b.shift) * Math.min(1, dt * 4); });
-    if (tracking && !free.length && bound.length) { const p = trackedPos(); trail.push({ x: p[0], y: p[1] }); }
+    if (tracking && !free.length) { const p = trackedPos(), lp = trail[trail.length - 1]; if (p) trail.push({ x: p[0], y: p[1], jump: !!lp && Math.abs(lp.x - p[0]) > 50 }); }
     if (trail.length > 240) trail.splice(0, trail.length - 240);
     layout(dt);
 
@@ -774,7 +863,7 @@
     const k = e.key.toLowerCase();
     if (k === ' ' && document.activeElement && document.activeElement.tagName === 'BUTTON') return;
     if (k === ' ' || k === 's') { e.preventDefault(); toggleSwitch(); }
-    else if (/^[1-8]$/.test(k)) setMat(keys[+k - 1]);
+    else if (/^[0-9]$/.test(k)) setMat(keys[(+k + 9) % 10]);
     else if (k === 't') flip('track');
     else if (k === 'p') flip('pause');
     else if (k === 'e') flip('explain');
@@ -799,6 +888,7 @@
     let res, cls;
     if (I >= 0.9) { res = 'Leiter'; cls = 'yes'; }
     else if (I > 0) { res = 'Leiter (schwach)'; cls = 'weak'; }
+    else if (mat === 'wasser') { res = 'Nichtleiter (praktisch)'; cls = 'no'; }
     else if (mat === 'lack') { res = 'kein Strom'; cls = 'no'; }
     else { res = 'Nichtleiter'; cls = 'no'; }
     if (results.has(key)) return;
@@ -824,6 +914,8 @@
     else if (m.kind === 'graphit') t = TXT.graphit;
     else if (m.kind === 'lack') t = lacquer ? TXT.lackOn : TXT.lackOff;
     else if (m.kind === 'air') t = TXT.air;
+    else if (m.kind === 'water') t = TXT.water;
+    else if (m.kind === 'salt') t = TXT.salt;
     else t = TXT.insul;
     const fill = s => s.replaceAll('{n}', m.name.replace(' (trocken)', ''));
     const I = closed ? physI() : 0;
@@ -834,6 +926,7 @@
     $('factH').textContent = m.kind === 'air' ? 'Luft' : m.name;
     $('factP').textContent = closed ? fill(t.on[1]) : fill(t.off);
     $('fact').hidden = !explain;
+    $('legIon').hidden = $('legIon2').hidden = m.kind !== 'salt';
     st.hidden = !explain;
   }
 
